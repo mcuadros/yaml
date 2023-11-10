@@ -63,9 +63,17 @@ func (p *parser) init() {
 	if p.doneInit {
 		return
 	}
-	p.anchors = make(map[string]*Node)
+
+	if p.anchors == nil {
+		p.anchors = make(map[string]*Node)
+	}
+
 	p.expect(yaml_STREAM_START_EVENT)
 	p.doneInit = true
+}
+
+func (p *parser) reuseAnchors(other *parser) {
+	p.anchors = other.anchors
 }
 
 func (p *parser) destroy() {
