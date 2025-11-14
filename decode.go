@@ -460,6 +460,12 @@ func (d *decoder) fieldByIndex(n *Node, v reflect.Value, index []int) (field ref
 	return v
 }
 
+var aliasExpansionCheckDisabled bool
+
+func EnableAliasExpansionCheck(enabled bool) {
+	aliasExpansionCheckDisabled = !enabled
+}
+
 const (
 	// 400,000 decode operations is ~500kb of dense object declarations, or
 	// ~5kb of dense object declarations with 10000% alias expansion
@@ -494,7 +500,7 @@ func (d *decoder) unmarshal(n *Node, out reflect.Value) (good bool) {
 	if d.aliasDepth > 0 {
 		d.aliasCount++
 	}
-	if d.aliasCount > 100 && d.decodeCount > 1000 && float64(d.aliasCount)/float64(d.decodeCount) > allowedAliasRatio(d.decodeCount) {
+	if !aliasExpansionCheckDisabled && d.aliasCount > 100 && d.decodeCount > 1000 && float64(d.aliasCount)/float64(d.decodeCount) > allowedAliasRatio(d.decodeCount) {
 		failf("document contains excessive aliasing")
 	}
 	if out.Type() == nodeType {
